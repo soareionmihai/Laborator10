@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.R;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.controller.PlacesAdapter;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.general.Constants;
+import ro.pub.cs.systems.pdsd.lab10.googlemaps.general.Utilities;
 import ro.pub.cs.systems.pdsd.lab10.googlemaps.model.Place;
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,8 +28,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class GoogleMapsActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
 	
@@ -55,7 +58,7 @@ public class GoogleMapsActivity extends Activity implements ConnectionCallbacks,
 		
 		@Override
 		public void onClick(View view) {
-
+			
 			// TODO exercise 6a
 			// check whether latitude, longitude and name are filled, otherwise long an error
 			// navigate to the requested position (latitude, longitude)
@@ -63,7 +66,22 @@ public class GoogleMapsActivity extends Activity implements ConnectionCallbacks,
 			// add the MarkerOptions to the Google Map
 			// add the Place information to the places list
 			// notify the placesAdapter that the data set was changed
-
+			
+			if(!latitudeEditText.getText().toString().isEmpty() && !longitudeEditText.getText().toString().isEmpty())
+			{
+				double latitude = Double.parseDouble(latitudeEditText.getText().toString());
+				double longitude = Double.parseDouble(longitudeEditText.getText().toString());
+				navigateToLocation(latitude, longitude);
+				MarkerOptions marker = new MarkerOptions()
+				  .position(new LatLng(latitude,longitude)).title(nameEditText.getText().toString());
+				marker.icon(BitmapDescriptorFactory.defaultMarker(Utilities.getDefaultMarker(markerTypeSpinner.getSelectedItemPosition())));
+				googleMap.addMarker(marker);
+				places.add(new Place(latitude, longitude, nameEditText.getText().toString(), Utilities.getDefaultMarker(markerTypeSpinner.getSelectedItemPosition())));
+				placesAdapter.notifyDataSetChanged();
+			}
+			else 
+				Toast.makeText(getApplicationContext(), "coordinates, duration", Toast.LENGTH_SHORT).show();
+			
 		}
 	}
 	
@@ -78,6 +96,13 @@ public class GoogleMapsActivity extends Activity implements ConnectionCallbacks,
 			// clear the Google Map
 			// clear the places List
 			// notify the placesAdapter that the data set was changed
+			if (places.isEmpty()) {
+				Toast.makeText(getApplicationContext(), "no data to erase", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			googleMap.clear();
+			places.clear();
+			placesAdapter.notifyDataSetChanged();
 
 		}
 	}	
